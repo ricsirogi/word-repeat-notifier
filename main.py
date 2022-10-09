@@ -1,17 +1,28 @@
+# Import the libraries
 import tkinter as tk
-import math
-import collections
 
+# Make the window
 win = tk.Tk()
 win.title("Word repeat notifier")
 
+
 def StartSearch():
-    text = textBox.get("1.0", "end")
-    words = []
-    temp = ""
-    isSpace = False
-    wordCounter = 0
-    sentenceCounter = 0
+    """
+    The whole meat of this program.
+    Counts the words and sentences,
+    and displays the repeated words
+    and their occurrences.
+    """
+
+    # Declare variables 
+    text = textBox.get("0.0", "end") # the content of the text box
+    words = [] # list of all the words
+    temp = "" # temporary variable that helps with 
+    isSpace = False # temporary variable, that helps with preventing registering double spaces as one word
+    wordCounter = 0 # counts the total wordsd
+    sentenceCounter = 0 # counts the total sentences
+
+    # Loops thorough every character of the text
     for counter, i in enumerate(text):
         if i != " ":
             temp += i
@@ -25,8 +36,8 @@ def StartSearch():
         if counter == len(text)-1:
             words.append(temp)
             temp = ""
-        if i == ".":
-            if text[counter+1] == " ":
+        if i == "." or i == "?" or i == "!":
+            if text[counter+1] == " " or text[counter+1] != "." and not text[counter+1].isnumeric():
                 sentenceCounter += 1
     words[len(words)-1] = words[len(words)-1].rstrip()
     totalWordsLabel["text"] = f"Total words: {wordCounter}\nTotal sentences: {sentenceCounter}"
