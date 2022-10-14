@@ -26,11 +26,11 @@ def StartSearch():
     isSpace = False # temporary variable, that helps with preventing registering double spaces as one word
     wordCounter = 1 # counts the total word  (there's plus one, because the wor counter doesn't count the last word)
     sentenceCounter = 0 # counts the total sentences
-    endOfSentenceCharacters = [".", "?", "!"]
+    endOfSentenceCharacters = [".", "?", "!", ":"]
 
     # Loops thorough every character of the text
     for counter, i in enumerate(text):
-        if i != " " and i != "\n":
+        if i != " ":
             if i != "\n" and i not in endOfSentenceCharacters:
                 temp += i
             isSpace = False
@@ -46,11 +46,16 @@ def StartSearch():
             temp = ""
         if i in endOfSentenceCharacters:
             try:
-                if text[counter+1] == " " or text[counter+1] != "." and not text[counter+1].isnumeric():
+                if text[counter+1] == " " or text[counter+1] != "." and text[counter-1] != "." and not text[counter+1].isnumeric():
                     sentenceCounter += 1
             except IndexError:
                 sentenceCounter += 1
-    
+
+                    
+
+    # if the wordCounter is 1, that means that no words were added, since it's 1 by default, so it becomes 0 
+    if wordCounter == 1:
+        wordCounter = 0
     words[len(words)-1] = words[len(words)-1].rstrip()
     totalWordsLabel["text"] = f"Total words: {wordCounter}\nTotal sentences: {sentenceCounter}"
 
