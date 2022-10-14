@@ -17,7 +17,7 @@ def StartSearch():
     # Declare variables 
 
     # | the content of the text box 
-    # | (there's always a "\n" at the end of the text)
+    # | (there's always a "\n" at the end of the text and I don't like that.)
     # | (remove extra spaces at the end of text, to prevent them from )
     # V (.lower() for easier handling of the text) 
     text = textBox.get("0.0", "end").rstrip("\n").rstrip(" ").lower()
@@ -27,10 +27,10 @@ def StartSearch():
     wordCounter = 1 # counts the total word  (there's plus one, because the wor counter doesn't count the last word)
     sentenceCounter = 0 # counts the total sentences
     endOfSentenceCharacters = [".", "?", "!"]
-    repeatedWordsLabelList = [] # doesn't do anything for now, but I will rework the way I display the repeated words, so I can display more words.
+
     # Loops thorough every character of the text
     for counter, i in enumerate(text):
-        if i != " ":
+        if i != " " and i != "\n":
             if i != "\n" and i not in endOfSentenceCharacters:
                 temp += i
             isSpace = False
@@ -71,23 +71,34 @@ def StartSearch():
 
     oRepeatedWords = dict(sorted(repeatedWords.items(), key=lambda x:x[1], reverse=True))
 
-    repeatedWordsLabel["text"] = ""
+    repeatedWordsListbox.delete(0, "end")
     for i in oRepeatedWords:
-        repeatedWordsLabel["text"] += f"{i}: {oRepeatedWords[i]}\n"
+        repeatedWordsListbox.insert("end", f"{i}: {oRepeatedWords[i]}\n")
 
-    if repeatedWordsLabel["text"] == "":
-        repeatedWordsLabel["text"] = "Wow! No repeated words!"
-
-textBox = tk.Text(win, height=3, width=50)
-startButton = tk.Button(win, text="Start!", command=lambda:StartSearch())
-totalWordsLabel = tk.Label(win)
-repeatedWordsLabel = tk.Label(win)
+    if repeatedWordsListbox.get("end") == "":
+        totalWordsLabel["text"] += "\n\nYay! No repeated words!"
+    
 
 
+statsFrame = tk.Frame(win)
+baseFrame = tk.Frame(win)
+repeatedWordsFrame =  tk.Frame(win)
+
+textBox = tk.Text(baseFrame, height=5, width=50, wrap="word")
+startButton = tk.Button(baseFrame, text="Start!", command=lambda:StartSearch())
+totalWordsLabel = tk.Label(statsFrame)
+repeatedWordsScrollbar=tk.Scrollbar(repeatedWordsFrame, orient="vertical")
+repeatedWordsListbox = tk.Listbox(repeatedWordsFrame, yscrollcommand=repeatedWordsScrollbar.set)
+
+repeatedWordsScrollbar.config(command=repeatedWordsListbox.yview)
+
+baseFrame.grid(row=0, column=0)
+statsFrame.grid(row=1, column=0)
+repeatedWordsFrame.grid(row=2, column=0)
 textBox.grid(row=0, column=0)
 startButton.grid(row=0, column=1)
 totalWordsLabel.grid(row=1, column=0, sticky="w")
-repeatedWordsLabel.grid(row=2, column=0, sticky="w")
+repeatedWordsListbox.pack(side="left", fill="both")
+repeatedWordsScrollbar.pack(side="right", fill="both")
 
 win.mainloop()
-
