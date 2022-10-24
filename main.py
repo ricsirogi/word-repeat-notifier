@@ -1,5 +1,7 @@
 # Import the libraries
 import tkinter as tk
+import re
+
 
 # Make the window
 win = tk.Tk()
@@ -23,62 +25,34 @@ def StartSearch():
     text = textBox.get("0.0", "end").rstrip("\n").rstrip(" ").lower()
     words = [] # list of all the words
     temp = "" # temporary variable that helps with 
-    isSpace = False # temporary variable, that helps with preventing registering double spaces as one word
-    wordCounter = 1 # counts the total word  (there's plus one, because the wor counter doesn't count the last word)
-    sentenceCounter = 0 # counts the total sentences
-    endOfSentenceCharacters = [".", "?", "!", ":"]
+    sentences = 0 # counts the total sentences
 
-    # Loops thorough every character of the text
-    for counter, i in enumerate(text):
-        if i != " ":
-            if i != "\n" and i not in endOfSentenceCharacters:
-                temp += i
-            isSpace = False
-        else:
-            if not isSpace:
-                words.append(temp)
-                temp = ""
-                wordCounter += 1
-                isSpace = True
-                
-        if counter == len(text)-1:
-            words.append(temp)
-            temp = ""
-        if i in endOfSentenceCharacters:
-            try:
-                if text[counter+1] == " " or text[counter+1] != "." and text[counter-1] != "." and not text[counter+1].isnumeric():
-                    sentenceCounter += 1
-            except IndexError:
-                sentenceCounter += 1
+    # find all words
+    words = re.findall("\w+", text, re.I)
+    for i in re.findall("\w+-\w+", text, re.I):
+        words.append(i)
+        words.remove(i[0:i.find("-")])
+        words.remove(i[i.find("-")+1:len(i)])
+    word_count = len(words)
 
-                    
-
-    # if the wordCounter is 1, that means that no words were added, since it's 1 by default, so it becomes 0 
-    if wordCounter == 1:
-        wordCounter = 0
-    words[len(words)-1] = words[len(words)-1].rstrip()
-    totalWordsLabel["text"] = f"Total words: {wordCounter}\nTotal sentences: {sentenceCounter}"
-
-    repeatedWords = {}
+    # find all sentences
+    sentences = len(re.findall(r"\w+\.|\w+\!|\w\?|\w\:", text))
+    # find all repeated words and order them into a dictionary
+    repeated_words = {}
     for i in words:
-        try:
-            repeatedWords[i] = repeatedWords.get(i) + 1
-        except:
-            repeatedWords[i] = 1
-    
-    toRemove = []
-    for i in repeatedWords:
-        if repeatedWords.get(i) == 1:
-            toRemove.append(i)
-    
-    for i in toRemove:
-        repeatedWords.pop(i)
+        if i not in repeated_words:
+            temp = re.findall(fr"\b{i}\b", str(words))
+            if len(temp) != 1:
+                repeated_words[i] = len(temp)
 
-    oRepeatedWords = dict(sorted(repeatedWords.items(), key=lambda x:x[1], reverse=True))
+    repeated_words = dict(sorted(repeated_words.items(), key=lambda x:x[1], reverse=True))      
+
+    totalWordsLabel["text"] = f"Total words: {word_count}\nTotal sentences: {sentences}"
+
 
     repeatedWordsListbox.delete(0, "end")
-    for i in oRepeatedWords:
-        repeatedWordsListbox.insert("end", f"{i}: {oRepeatedWords[i]}\n")
+    for i in repeated_words:
+        repeatedWordsListbox.insert("end", f"{i}: {repeated_words[i]}\n")
 
     if repeatedWordsListbox.get("end") == "":
         totalWordsLabel["text"] += "\n\nYay! No repeated words!"
