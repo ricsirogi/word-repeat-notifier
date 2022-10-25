@@ -29,6 +29,12 @@ def StartSearch():
 
     # find all words
     words = re.findall("\w+", text, re.I)
+
+    # count words with "-" between them as one word
+    # then delete the original occurances, since it counts them separately
+    # (good-looking will count as ["good", "looking"] and it will make it ["good-looking"])
+    # (by deleting the two separate words and adding the actual word.)
+    # thats a complicated and long way of explaining it...
     for i in re.findall("\w+-\w+", text, re.I):
         words.append(i)
         words.remove(i[0:i.find("-")])
