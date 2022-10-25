@@ -14,6 +14,7 @@ def StartSearch():
     Counts the words and sentences,
     and displays the repeated words
     and their occurrences.
+    (Also the number of sentences)
     """
 
     # Declare variables 
@@ -28,17 +29,8 @@ def StartSearch():
     sentences = 0 # counts the total sentences
 
     # find all words
-    words = re.findall("\w+", text, re.I)
+    words = re.findall(r"\w+-\w+|\w+", text, re.I)
 
-    # count words with "-" between them as one word
-    # then delete the original occurances, since it counts them separately
-    # (good-looking will count as ["good", "looking"] and it will make it ["good-looking"])
-    # (by deleting the two separate words and adding the actual word.)
-    # thats a complicated and long way of explaining it...
-    for i in re.findall("\w+-\w+", text, re.I):
-        words.append(i)
-        words.remove(i[0:i.find("-")])
-        words.remove(i[i.find("-")+1:len(i)])
     word_count = len(words)
 
     # find all sentences
@@ -47,9 +39,23 @@ def StartSearch():
     repeated_words = {}
     for i in words:
         if i not in repeated_words:
+            to_delete = 0
+
+            # checks if the word has a hyphen next to it
+            hyphen_check_right = re.findall(fr"\b{i}-", str(words))
+            hyphen_check_left = re.findall(fr"-{i}\b", str(words))
+
+            # if the word does have a hyphen, then it fixes stuff
+            if hyphen_check_right != [] or hyphen_check_left != []:
+                if hyphen_check_right:
+                    to_delete = len(hyphen_check_right)
+                else:
+                    to_delete = len(hyphen_check_left)
+
             temp = re.findall(fr"\b{i}\b", str(words))
             if len(temp) != 1:
-                repeated_words[i] = len(temp)
+                repeated_words[i] = len(temp) - to_delete
+
 
     repeated_words = dict(sorted(repeated_words.items(), key=lambda x:x[1], reverse=True))      
 
